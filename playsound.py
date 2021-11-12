@@ -52,20 +52,18 @@ def _playsoundWin(sound, block = True):
       
     # All changes here are not done, I just need to winCommand(u'close media') after the media has done playing.
     # but imma take a break, I'm still a beginner to programming.
+           
+    # the alias is useless, as winmm just uses the filename for other commands. I just think it looks cleaner.
+
+    logger.debug('Starting')
+    winCommand(u'open {} alias media'.format(sound))
+    winCommand(u'play media{}'.format(' wait' if block else ''))
+    logger.debug('Returning')
+
+    # This helped me quite a bit with some of this, and future stuff I may do: 
+    # https://docs.microsoft.com/en-us/windows/win32/multimedia/classifications-of-mci-commands
+        
     
-    try:
-
-        logger.debug('Starting')
-        winCommand(u'open {} alias media'.format(sound))
-        winCommand(u'play media{}'.format(sound, ' wait' if block else ''))
-        logger.debug('Returning')
-
-    finally:
-        try:
-            pass
-        except PlaysoundException:
-            logger.error(u'Failed to close the file: {}'.format(sound))
-            # If it fails, there's nothing more that can be done...
 
 def _handlePathOSX(sound):
     sound = _canonicalizePath(sound)
