@@ -17,6 +17,7 @@ def _canonicalizePath(path):
         return path
 
 def _playsoundWin(sound, block = True):
+
     '''
     Utilizes windll.winmm. Tested and known to work with MP3 and WAVE on
     Windows 7 with Python 2.7. Probably works with more file formats.
@@ -28,10 +29,10 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
-    sound = '"' + _canonicalizePath(sound) + '"'
 
+    sound = '"' + _canonicalizePath(sound) + '"'
     from ctypes import create_unicode_buffer, windll, wintypes
-    from time   import sleep
+
     windll.winmm.mciSendStringW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.UINT, wintypes.HANDLE]
     windll.winmm.mciGetErrorStringW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.UINT]
 
@@ -40,28 +41,28 @@ def _playsoundWin(sound, block = True):
         buf = create_unicode_buffer(bufLen)
         command = ' '.join(command)
         errorCode = int(windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
+
         if errorCode:
             errorBuffer = create_unicode_buffer(bufLen)
             windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, bufLen - 1)  # use widestring version of the function
-            exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command +
-                                '\n    ' + errorBuffer.value)
-            logger.error(exceptionMessage)
-            raise PlaysoundException(exceptionMessage)
+
+            raise PlaysoundException("Error Code: {}, {}".format(errorCode, errorBuffer.value))
+
         return buf.value
 
     try:
+
         logger.debug('Starting')
         winCommand(u'open {}'.format(sound))
         winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
         logger.debug('Returning')
+
     finally:
         try:
-            winCommand(u'close {}'.format(sound))
-        except PlaysoundException:
-            logger.warning(u'Failed to close the file: {}'.format(sound))
-            # If it fails, there's nothing more that can be done...
             pass
+        except PlaysoundException:
+            logger.error(u'Failed to close the file: {}'.format(sound))
+            # If it fails, there's nothing more that can be done...
 
 def _handlePathOSX(sound):
     sound = _canonicalizePath(sound)
