@@ -49,12 +49,15 @@ def _playsoundWin(sound, block = True):
             raise PlaysoundException("Error Code: {}, {}".format(errorCode, errorBuffer.value))
 
         return buf.value
-
+      
+    # All changes here are not done, I just need to winCommand(u'close media') after the media has done playing.
+    # but imma take a break, I'm still a beginner to programming.
+    
     try:
 
         logger.debug('Starting')
-        winCommand(u'open {}'.format(sound))
-        winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
+        winCommand(u'open {} alias media'.format(sound))
+        winCommand(u'play media{}'.format(sound, ' wait' if block else ''))
         logger.debug('Returning')
 
     finally:
