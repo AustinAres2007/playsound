@@ -87,8 +87,6 @@ async def play(sound):
     durationms = winCommand(u'status media length')
     await asyncio.sleep(float(int(durationms) / 1000.0))
 
-    print("Closing.")
-
     winCommand(u'close media')
     logger.debug('Returning')
 
