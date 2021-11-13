@@ -1,27 +1,12 @@
 import asyncio
 import logging
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
 
 class PlaysoundException(Exception):
     pass
-
-
-def _canonicalizePath(path):
-
-    """
-    Support passing in a pathlib.Path-like object by converting to str.
-    """
-
-    import sys
-    if sys.version_info[0] >= 3:
-        return str(path)
-    else:
-        # On earlier Python versions, str is a byte string, so attempting to
-        # convert a unicode string to str will fail. Leave it alone in this case.
-        return path
-
 
 def winCommand(*command):
 
@@ -71,23 +56,38 @@ def resume():
         if errCode == 263:
             logger.error("Cannot resume, are you playing any media?")
 
+'''
+    Sends raw input to MCI (Can be anything, but will give an error if the syntax is incorrect)
+'''
+def send_raw(*command) -> Any:
+    command = ' '.join(command)
+    print(command)
+    responce = winCommand(u'{}'.format(command))
+
+    return responce
+
+'''
+    Seeks to the time specified.
+'''
+def seek(seconds: int):
+    winCommand(u'seek media to {}'.format(seconds*1000))
+    winCommand(u'play media')
+
 async def play(sound):
 
-    # All changes here are not done, I just need to winCommand(u'close media') after the media has done playing.
-    # but imma take a break, I'm still a beginner to programming.
-
+    # All changes here are not done, I just need to winCommand(u'close media') after the media has done playing. - DONE
     # the alias is useless, as winmm just uses the filename for other commands. I just think it looks cleaner.
-
-    sound = '"' + _canonicalizePath(sound) + '"'
 
     logger.debug('Starting')
 
-    winCommand(u'open {} alias media'.format(sound))
+    winCommand(u'open {} type waveaudio alias media'.format(sound))
     winCommand(u'play media')
     winCommand(u'set media time format milliseconds')
 
     durationms = winCommand(u'status media length')
     await asyncio.sleep(float(int(durationms) / 1000.0))
+
+    print("Closing.")
 
     winCommand(u'close media')
     logger.debug('Returning')
